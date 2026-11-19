@@ -1114,7 +1114,7 @@
   var gal = document.getElementById('gal');
   var text = document.getElementById('galtext');
   var playBtn = document.getElementById('galplay');
-  var TURN = 3000, FADE = 1000, settle = null;
+  var TURN = 3000, FADE = 1000, settle = null, words = null;
 
   function ready(s){ return s.getAttribute('src') && !s.getAttribute('data-failed') && s.complete && s.naturalWidth > 0; }
   function load(s){
@@ -1143,8 +1143,14 @@
     settle = setTimeout(function(){
       shots.forEach(function(s){ s.classList.remove('is-out'); });
     }, FADE + 100);
-    if(cap) cap.textContent = shots[i].getAttribute('data-cap') || '';
-    if(credit) credit.textContent = shots[i].getAttribute('data-credit') || '';
+    /* the words change halfway through the crossfade, when the new picture is
+       the one you see, never while the old one still fills the frame */
+    clearTimeout(words);
+    var on = shots[i];
+    words = setTimeout(function(){
+      if(cap) cap.textContent = on.getAttribute('data-cap') || '';
+      if(credit) credit.textContent = on.getAttribute('data-credit') || '';
+    }, was === i ? 0 : FADE / 2);
     [shots[(i + 1) % shots.length], shots[(i - 1 + shots.length) % shots.length]].forEach(function(s){
       if(s.getAttribute('src')) return;
       s.addEventListener('error', function(){ s.setAttribute('data-failed', '1'); }, {once: true});
